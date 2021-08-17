@@ -11,11 +11,13 @@ unset $(grep -v '^#' $ENVFILE | sed -E 's/(.*)=.*/\1/' | xargs)
 eval $(grep -v -e '^#' $ENVFILE | xargs -I {} echo export \'{}\')
 
 # Before run this script → Shutdown: Metro-server
-killall "Simulator" || true
 iOSname=${iOSname// /-}
+xcrun simctl shutdown $iOSname || true
+sleep 5
 if [[ $(xcrun simctl list | grep -w "$iOSname" | grep -w "Shutdown") =~ Shutdown ]];
 then
   echo "📱 iOS Simulator to be exist"
+  xcrun simctl boot $iOSname
 else
   echo "🔎 Simulator not exist! \n📟 Create Simulator"
   version=${iOSversion/./-}
@@ -26,6 +28,7 @@ else
   if xcrun simctl create $iOSname com.apple.CoreSimulator.SimDeviceType.$type com.apple.CoreSimulator.SimRuntime.iOS-$version;
   then
     echo "Great 🎉"
+    xcrun simctl boot $iOSname
   else
     echo "📵 Not correct data"
     echo "Please to Run → xcrun simctl list"
